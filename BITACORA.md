@@ -11,3 +11,9 @@
 - **Dónde me trabé:** calcular el almacenamiento a 5 años; decidí guardar un historial de cambios de stock para auditoría.
 - **Qué haré la próxima clase:** borrador de los diagramas lógico y físico (PNG y draw.io).
 - **Uso de IA:** le pedí a Claude un borrador de requisitos y cálculos; revisé los supuestos y verifiqué las cuentas.
+
+## Vie 6 nov
+- **Qué hice hoy:** borrador de los diagramas lógico (flujo de lectura, escritura y modelo de datos) y físico (gateway, balanceador, 2 instancias, primaria y réplica, con los SPOF marcados), en PNG y draw.io, en `docs/fase1/`.
+- **Dónde me trabé:** decidir qué componentes son puntos únicos de falla; marqué el gateway, el balanceador y la primaria.
+- **Qué haré la próxima clase:** escribir DISENO.md (justificación de cada componente y 3 riesgos) y la presentación .pptx para la entrega de la Fase 1.
+- **Uso de IA:** le pedí a Claude generar los diagramas; revisé que cada flecha corresponda al flujo real y que los SPOF estén bien marcados.
