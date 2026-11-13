@@ -17,3 +17,9 @@
 - **Dónde me trabé:** decidir qué componentes son puntos únicos de falla; marqué el gateway, el balanceador y la primaria.
 - **Qué haré la próxima clase:** escribir DISENO.md (justificación de cada componente y 3 riesgos) y la presentación .pptx para la entrega de la Fase 1.
 - **Uso de IA:** le pedí a Claude generar los diagramas; revisé que cada flecha corresponda al flujo real y que los SPOF estén bien marcados.
+
+## Mié 11 nov — Entrega Fase 1 (sin clases: avancé en casa)
+- **Qué hice hoy:** completé `docs/fase1/DISENO.md` (problemática, requisitos, estimación, diagramas, justificación de cada componente y 3 riesgos) y la presentación `Presentacion_Fase1.pptx`, con un guion para practicar.
+- **Dónde me trabé:** explicar el costo de cada componente; separé latencia, complejidad y dinero.
+- **Qué haré la próxima clase:** levantar la primaria y la réplica con Docker Compose y comprobar la replicación; balanceador con 2 instancias de prueba.
+- **Uso de IA:** le pedí a Claude un borrador del documento, la presentación y el guion; ensayé la presentación y ajusté lo que no sabía explicar.
