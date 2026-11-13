@@ -23,3 +23,8 @@
 - **Dónde me trabé:** explicar el costo de cada componente; separé latencia, complejidad y dinero.
 - **Qué haré la próxima clase:** levantar la primaria y la réplica con Docker Compose y comprobar la replicación; balanceador con 2 instancias de prueba.
 - **Uso de IA:** le pedí a Claude un borrador del documento, la presentación y el guion; ensayé la presentación y ajusté lo que no sabía explicar.
+
+## Jue 12 nov (estaba de viaje; avancé en la noche)
+- **Qué hice hoy:** levanté con Docker Compose la primaria y la réplica (streaming con `pg_basebackup` y slot) y comprobé que la réplica sigue a la primaria; NGINX alterna entre 2 instancias de prueba.
+- **Dónde me trabé:** Docker Desktop no arrancaba por un archivo `engine.sock` bloqueado; lo resolví renombrando la carpeta `docker-secrets-engine`.
+- **Qué haré la próxima clase:** agregar el gateway con API key y límite de peticiones, documentar EVIDENCIAS.md y etiquetar `fase-2`.

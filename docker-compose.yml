@@ -1,0 +1,98 @@
+# Stock Farmacias - Fase 2
+# Gateway (Kong) -> Balanceador (NGINX) -> app-1 / app-2 -> PostgreSQL primaria + réplica
+# Solo el gateway expone un puerto al computador (8000).
+
+services:
+  db-primary:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      REPLICATION_USER: ${REPLICATION_USER}
+      REPLICATION_PASSWORD: ${REPLICATION_PASSWORD}
+    command: >
+      postgres
+      -c wal_level=replica
+      -c max_wal_senders=10
+      -c max_replication_slots=10
+      -c hot_standby=on
+    volumes:
+      - primary-data:/var/lib/postgresql/data
+      - ./db/primary:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  db-replica:
+    image: postgres:16
+    user: postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      REPLICATION_USER: ${REPLICATION_USER}
+      REPLICATION_PASSWORD: ${REPLICATION_PASSWORD}
+      PGDATA: /var/lib/postgresql/data
+    entrypoint: ["bash", "/replica/entrypoint.sh"]
+    volumes:
+      - replica-data:/var/lib/postgresql/data
+      - ./db/replica:/replica:ro
+    depends_on:
+      db-primary:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+
+  app-1: &app
+    build: ./app
+    environment:
+      INSTANCE_ID: app-1
+      DB_PRIMARY_URL: ${DB_PRIMARY_URL}
+      DB_REPLICA_URL: ${DB_REPLICA_URL}
+    depends_on:
+      db-primary:
+        condition: service_healthy
+      db-replica:
+        condition: service_healthy
+
+  app-2:
+    <<: *app
+    environment:
+      INSTANCE_ID: app-2
+      DB_PRIMARY_URL: ${DB_PRIMARY_URL}
+      DB_REPLICA_URL: ${DB_REPLICA_URL}
+
+  balanceador:
+    image: nginx:1.27
+    volumes:
+      - ./balanceador/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - app-1
+      - app-2
+
+  gateway:
+    image: kong:3.6
+    environment:
+      KONG_DATABASE: "off"
+      KONG_DECLARATIVE_CONFIG: /tmp/kong.yml
+      KONG_PROXY_LISTEN: 0.0.0.0:8000
+      KONG_ADMIN_LISTEN: "off"
+      KONG_PROXY_ACCESS_LOG: /dev/stdout
+      KONG_PROXY_ERROR_LOG: /dev/stderr
+      API_KEY_POS: ${API_KEY_POS}
+    # Inserta la API key del .env en la configuración antes de arrancar Kong
+    entrypoint: ["sh", "-c", "sed \"s/__API_KEY_POS__/$${API_KEY_POS}/\" /kong/kong.template.yml > /tmp/kong.yml && exec /docker-entrypoint.sh kong docker-start"]
+    volumes:
+      - ./gateway/kong.template.yml:/kong/kong.template.yml:ro
+    ports:
+      - "8000:8000"
+    depends_on:
+      - balanceador
+
+volumes:
+  primary-data:
+  replica-data:

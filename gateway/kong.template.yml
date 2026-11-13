@@ -1,0 +1,39 @@
+# Kong en modo sin base de datos (declarativo).
+# __API_KEY_POS__ se reemplaza al arrancar por el valor de API_KEY_POS del archivo .env
+_format_version: "3.0"
+
+services:
+  - name: stock-api
+    url: http://balanceador:80
+    routes:
+      # Lecturas públicas (web y app): límite de peticiones por cliente
+      - name: lecturas-publicas
+        paths: ["/api/v1"]
+        methods: ["GET"]
+        strip_path: false
+        plugins:
+          - name: rate-limiting
+            config:
+              minute: 10          # bajo a propósito para demostrarlo; en producción 60
+              policy: local
+              limit_by: ip
+
+      # Escrituras del POS: exigen API key
+      - name: escrituras-pos
+        paths: ["/api/v1"]
+        methods: ["POST", "PUT"]
+        strip_path: false
+        plugins:
+          - name: key-auth
+            config:
+              key_names: ["apikey"]
+
+      # Health check sin restricciones
+      - name: health
+        paths: ["/health"]
+        strip_path: false
+
+consumers:
+  - username: pos-locales
+    keyauth_credentials:
+      - key: __API_KEY_POS__

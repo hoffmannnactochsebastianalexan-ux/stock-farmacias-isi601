@@ -1,0 +1,5 @@
+# Los scripts que corren dentro de Linux deben tener fin de línea LF
+*.sh text eol=lf
+*.conf text eol=lf
+*.yml text eol=lf
+*.sql text eol=lf
