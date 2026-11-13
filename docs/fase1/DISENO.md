@@ -1,8 +1,8 @@
 # Documento de diseño — Fase 1
 
-**Proyecto:** Consulta de stock de una cadena de farmacias
-**Módulo:** ISI601 Taller de Diseño de Sistemas · Proyecto individual
-**Autor:** Sebastian Hoffmann
+**Proyecto:** Consulta de stock de una cadena de farmacias  
+**Módulo:** ISI601 Taller de Diseño de Sistemas · Proyecto individual  
+**Autor:** Sebastian Hoffmann  
 **Repositorio:** https://github.com/hoffmannnactochsebastianalexan-ux/stock-farmacias-isi601
 
 ---
@@ -14,6 +14,7 @@
 **Qué problema resuelve:** hoy el cliente no sabe en qué local está el medicamento que necesita. Llama por teléfono o recorre varios locales. El sistema responde *"¿qué locales tienen el producto X y cuántas unidades?"*.
 
 **Por qué hay muchas más lecturas que escrituras:** miles de clientes consultan, pero solo los 120 locales escriben, y lo hacen por lotes cada 15 minutos:
+
 - 400.000 lecturas al día frente a 5.760 escrituras al día, es decir, **≈ 70 : 1**.
 
 **Cumplimiento de los 5 criterios del enunciado:**
@@ -65,7 +66,7 @@ Detalle en [PROBLEMA.md](PROBLEMA.md).
 - La hora punta concentra el 15 % del tráfico del día.
 - En una emergencia sanitaria, el tráfico se multiplica por 5.
 
-| | Promedio | Hora punta | Emergencia / 3 años |
+| Carga | Promedio | Hora punta | Emergencia / 3 años |
 |---|---|---|---|
 | Lecturas/s | 4,6 | 17 | 85 / 250 |
 | Escrituras/s | 0,07 | 2 (peor minuto) | 5 (300 locales) |
