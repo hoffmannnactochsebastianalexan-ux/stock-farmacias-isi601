@@ -28,3 +28,9 @@
 - **Qué hice hoy:** levanté con Docker Compose la primaria y la réplica (streaming con `pg_basebackup` y slot) y comprobé que la réplica sigue a la primaria; NGINX alterna entre 2 instancias de prueba.
 - **Dónde me trabé:** Docker Desktop no arrancaba por un archivo `engine.sock` bloqueado; lo resolví renombrando la carpeta `docker-secrets-engine`.
 - **Qué haré la próxima clase:** agregar el gateway con API key y límite de peticiones, documentar EVIDENCIAS.md y etiquetar `fase-2`.
+
+## Vie 13 nov — Entrega Fase 2
+- **Qué hice hoy:** Kong como gateway (rutas `/api/v1`, API key para POST y límite de peticiones para GET) y `docs/fase2/EVIDENCIAS.md` con las 4 pruebas; README con los pasos para levantar el sistema.
+- **Dónde me trabé:** el límite de peticiones se comparte entre pruebas en el mismo minuto; hay que esperar un minuto para repetirla.
+- **Qué haré la próxima clase:** reemplazar el servicio de prueba por la aplicación real (POST a la primaria con X-DB: primary).
+- **Uso de IA:** Claude armó el docker-compose y las configuraciones; yo ejecuté las pruebas en Kiro y revisé que entiendo qué hace cada servicio.
