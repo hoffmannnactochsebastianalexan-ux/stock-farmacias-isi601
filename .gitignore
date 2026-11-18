@@ -6,3 +6,8 @@ venv/
 db/data/
 pgdata/
 *.log
+
+# Archivos de entrega al aula virtual (no van al repositorio)
+*.rar
+*.zip
+docs/fase2/docker.png.png

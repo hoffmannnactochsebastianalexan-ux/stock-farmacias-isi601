@@ -34,3 +34,9 @@
 - **Dónde me trabé:** el límite de peticiones se comparte entre pruebas en el mismo minuto; hay que esperar un minuto para repetirla.
 - **Qué haré la próxima clase:** reemplazar el servicio de prueba por la aplicación real (POST a la primaria con X-DB: primary).
 - **Uso de IA:** Claude armó el docker-compose y las configuraciones; yo ejecuté las pruebas en Kiro y revisé que entiendo qué hace cada servicio.
+
+## Mié 18 nov
+- **Qué hice hoy:** reemplacé el servicio de prueba por la aplicación real en Python: `POST /api/v1/stock` escribe en la primaria (`X-DB: primary`) y los `GET` de stock, productos y locales leen de la réplica (`X-DB: replica`). Las dos funciones del gateway siguen funcionando (API key y límite de peticiones).
+- **Dónde me trabé:** Docker Desktop volvió a fallar por el archivo `engine.sock` bloqueado; repetí la solución de renombrar la carpeta `docker-secrets-engine`.
+- **Qué haré la próxima clase:** empezar las pruebas de falla (apagar una instancia, cortar la réplica, promover la réplica) y medir RPO y RTO.
+- **Uso de IA:** Claude escribió el código de la aplicación; probé cada endpoint por el gateway y revisé las cabeceras X-Instance y X-DB.

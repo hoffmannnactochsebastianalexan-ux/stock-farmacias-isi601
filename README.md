@@ -42,13 +42,33 @@ Clientes ──► Kong (gateway, :8000) ──► NGINX (balanceador) ──►
 
 Para apagar: `docker compose down`. Para borrar también los datos: `docker compose down -v`.
 
+## Cómo probar la aplicación
+
+En Windows PowerShell usa `curl.exe`. Todas las respuestas traen `X-Instance` (qué instancia respondió) y `X-DB` (qué base atendió).
+
+| Acción | Comando | Base |
+|---|---|---|
+| Salud | `curl.exe -i http://localhost:8000/health` | — |
+| Buscar productos | `curl.exe -i "http://localhost:8000/api/v1/productos?q=ibu"` | réplica |
+| Stock de un producto por local | `curl.exe -i "http://localhost:8000/api/v1/stock?producto_id=1"` | réplica |
+| Locales de una comuna | `curl.exe -i "http://localhost:8000/api/v1/locales?comuna=Santiago"` | réplica |
+| Actualizar stock (POS) | `curl.exe -i -X POST http://localhost:8000/api/v1/stock -H "apikey: cambiar_esto" -H "Content-Type: application/json" -d "@ejemplos/stock.json"` | primaria |
+
+Formato del POST: `{"local_id": 2, "items": [{"producto_id": 1, "cantidad": 12}]}`.
+
+### Lectura de lo recién escrito
+
+- El **POST** responde con el stock recién guardado leído desde la **primaria** (`X-DB: primary`), así el POS confirma su propia escritura sin esperar a la réplica (*read-your-writes*).
+- Los **GET** leen de la **réplica** (`X-DB: replica`). Justo después de un POST pueden mostrar el valor anterior durante el atraso de la réplica (normalmente menos de 1 s; el objetivo es ≤ 30 s). Cada fila trae `actualizado_en` para saber qué tan reciente es.
+- Si la réplica no responde, la aplicación lee de la primaria y lo indica con `X-DB: primary`.
+
 ## Componentes
 
 | Servicio | Imagen | Función |
 |---|---|---|
 | `gateway` | kong:3.6 (sin BD) | Única entrada (puerto 8000). Rutas `/api/v1/*` y `/health`. API key para POST, límite de peticiones para GET |
 | `balanceador` | nginx:1.27 | Round-robin entre app-1 y app-2; retira la instancia caída |
-| `app-1`, `app-2` | `./app` (Python) | Sin estado. En la Fase 2 es un servicio de prueba que responde `X-Instance` |
+| `app-1`, `app-2` | `./app` (Python + psycopg) | Aplicación real, sin estado. POST → primaria, GET → réplica; cabeceras `X-Instance` y `X-DB` |
 | `db-primary` | postgres:16 | Escrituras. Crea el usuario de replicación, el slot y el esquema |
 | `db-replica` | postgres:16 | Lecturas. Se copia con `pg_basebackup` y sigue a la primaria por streaming |
 
