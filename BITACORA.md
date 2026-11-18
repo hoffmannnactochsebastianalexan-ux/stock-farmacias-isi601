@@ -40,3 +40,9 @@
 - **Dónde me trabé:** Docker Desktop volvió a fallar por el archivo `engine.sock` bloqueado; repetí la solución de renombrar la carpeta `docker-secrets-engine`.
 - **Qué haré la próxima clase:** empezar las pruebas de falla (apagar una instancia, cortar la réplica, promover la réplica) y medir RPO y RTO.
 - **Uso de IA:** Claude escribió el código de la aplicación; probé cada endpoint por el gateway y revisé las cabeceras X-Instance y X-DB.
+
+## Mié 18 nov (tarde) — Pruebas de falla
+- **Qué hice:** ejecuté y documenté las 3 pruebas de falla en `docs/fase3/PRUEBAS_DE_FALLA.md`: apagar una instancia (0 peticiones fallidas), cortar la réplica (lecturas atrasadas; fallback a la primaria si cae) y matar la primaria y promover la réplica (RPO = 0, RTO = 11,1 s).
+- **Dónde me trabé:** después de recrear las instancias, NGINX seguía usando sus IP antiguas y respondía 502; lo resolví con `resolver` y `resolve` en el upstream.
+- **Qué haré la próxima clase:** README final (decisiones de diseño y limitaciones), etiqueta `fase-3` y practicar la demostración en vivo.
+- **Uso de IA:** Claude automatizó las mediciones con scripts; revisé los resultados y las conclusiones de cada experimento.
