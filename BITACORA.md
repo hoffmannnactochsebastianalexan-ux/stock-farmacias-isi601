@@ -36,13 +36,7 @@
 - **Uso de IA:** Claude armó el docker-compose y las configuraciones; yo ejecuté las pruebas en Kiro y revisé que entiendo qué hace cada servicio.
 
 ## Mié 18 nov
-- **Qué hice hoy:** reemplacé el servicio de prueba por la aplicación real en Python: `POST /api/v1/stock` escribe en la primaria (`X-DB: primary`) y los `GET` de stock, productos y locales leen de la réplica (`X-DB: replica`). Las dos funciones del gateway siguen funcionando (API key y límite de peticiones).
-- **Dónde me trabé:** Docker Desktop volvió a fallar por el archivo `engine.sock` bloqueado; repetí la solución de renombrar la carpeta `docker-secrets-engine`.
-- **Qué haré la próxima clase:** empezar las pruebas de falla (apagar una instancia, cortar la réplica, promover la réplica) y medir RPO y RTO.
-- **Uso de IA:** Claude escribió el código de la aplicación; probé cada endpoint por el gateway y revisé las cabeceras X-Instance y X-DB.
-
-## Mié 18 nov (tarde) — Pruebas de falla
-- **Qué hice:** ejecuté y documenté las 3 pruebas de falla en `docs/fase3/PRUEBAS_DE_FALLA.md`: apagar una instancia (0 peticiones fallidas), cortar la réplica (lecturas atrasadas; fallback a la primaria si cae) y matar la primaria y promover la réplica (RPO = 0, RTO = 11,1 s).
-- **Dónde me trabé:** después de recrear las instancias, NGINX seguía usando sus IP antiguas y respondía 502; lo resolví con `resolver` y `resolve` en el upstream.
-- **Qué haré la próxima clase:** README final (decisiones de diseño y limitaciones), etiqueta `fase-3` y practicar la demostración en vivo.
-- **Uso de IA:** Claude automatizó las mediciones con scripts; revisé los resultados y las conclusiones de cada experimento.
+- **Qué hice hoy:** reemplacé el servicio de prueba por la aplicación real en Python. El `POST /api/v1/stock` escribe en la base primaria y responde `X-DB: primary`; las consultas de stock, productos y locales leen de la réplica y responden `X-DB: replica`. Las dos funciones del gateway siguen activas (API key y límite de peticiones). Además adelanté las tres pruebas de falla y las documenté en `docs/fase3/PRUEBAS_DE_FALLA.md`: al apagar una instancia no falló ninguna petición; al cortar la réplica se vieron lecturas desactualizadas; y al matar la primaria y promover la réplica medí RPO = 0 y RTO = 11,1 s.
+- **Dónde me trabé:** Docker Desktop volvió a fallar al iniciar por un archivo `engine.sock` bloqueado, y lo resolví renombrando la carpeta `docker-secrets-engine`. En la tercera prueba, después de recrear las instancias, NGINX seguía usando sus direcciones IP antiguas y respondía 502; lo corregí configurando NGINX para que vuelva a resolver los nombres cada 5 segundos.
+- **Qué haré la próxima clase:** completar el README final con las decisiones de diseño y las limitaciones, y practicar la demostración en vivo para la presentación.
+- **Uso de IA:** le pedí a Claude el código de la aplicación y scripts para medir las fallas. Yo probé cada endpoint por el gateway, revisé las cabeceras X-Instance y X-DB, y verifiqué que los resultados y las conclusiones de cada prueba tuvieran sentido.
