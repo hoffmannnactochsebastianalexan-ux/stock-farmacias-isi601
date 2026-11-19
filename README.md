@@ -63,6 +63,34 @@ Formato del POST: `{"local_id": 2, "items": [{"producto_id": 1, "cantidad": 12}]
 - Los **GET** leen de la **réplica** (`X-DB: replica`). Justo después de un POST pueden mostrar el valor anterior durante el atraso de la réplica (normalmente menos de 1 s; el objetivo es ≤ 30 s). Cada fila trae `actualizado_en` para saber qué tan reciente es.
 - Si la réplica no responde, la aplicación lee de la primaria y lo indica con `X-DB: primary`.
 
+## Evidencias de funcionamiento
+
+Capturas de la terminal con el sistema corriendo (aplicación real, 19 nov 2026).
+
+**1. Los 6 servicios arriba.** Las bases están `healthy` y **solo el gateway publica un puerto** (8000).
+
+![Servicios](docs/fase3/capturas/foto1-servicios.png)
+
+**2. El balanceador alterna entre las instancias.** Dos peticiones seguidas a `/health`: la primera la atiende `app-1` y la segunda `app-2` (cabecera `X-Instance`).
+
+![Balanceador](docs/fase3/capturas/foto2-balanceador.png)
+
+**3. Gateway, función 1: API key.** Un POST sin `apikey` se rechaza con `401 Unauthorized`.
+
+![Sin API key](docs/fase3/capturas/foto3-sin-apikey.png)
+
+**4. Escritura en la primaria.** El mismo POST con la API key del POS responde `201 Created` y `X-DB: primary`.
+
+![Con API key](docs/fase3/capturas/foto4-con-apikey.png)
+
+**5. Gateway, función 2: límite de peticiones.** De 12 lecturas seguidas, 10 responden `200` y las 2 últimas `429`.
+
+![Límite de peticiones](docs/fase3/capturas/foto5-limite.png)
+
+**6. La réplica sigue a la primaria.** Se inserta un local en la primaria (`INSERT 0 1`) y aparece al consultar la réplica.
+
+![Réplica](docs/fase3/capturas/foto6-replica.png)
+
 ## Componentes
 
 | Servicio | Imagen | Función |
