@@ -12,6 +12,7 @@ Clientes ──► Kong (gateway, :8000) ──► NGINX (balanceador) ──►
 - Problemática: [docs/fase1/PROBLEMA.md](docs/fase1/PROBLEMA.md)
 - Diseño (Fase 1): [docs/fase1/DISENO.md](docs/fase1/DISENO.md)
 - Evidencias (Fase 2): [docs/fase2/EVIDENCIAS.md](docs/fase2/EVIDENCIAS.md)
+- Pruebas de falla (Fase 3): [docs/fase3/PRUEBAS_DE_FALLA.md](docs/fase3/PRUEBAS_DE_FALLA.md)
 - Bitácora: [BITACORA.md](BITACORA.md)
 
 ## Requisitos
@@ -37,7 +38,7 @@ Clientes ──► Kong (gateway, :8000) ──► NGINX (balanceador) ──►
 4. Comprobar que funciona (en PowerShell usa `curl.exe`):
    ```bash
    docker compose ps
-   curl -i http://localhost:8000/api/v1/stock
+   curl -i http://localhost:8000/health
    ```
 
 Para apagar: `docker compose down`. Para borrar también los datos: `docker compose down -v`.
@@ -77,8 +78,33 @@ Formato del POST: `{"local_id": 2, "items": [{"producto_id": 1, "cantidad": 12}]
 Las variables están en `.env` (no se sube a Git); `.env.example` tiene valores de ejemplo:
 `POSTGRES_*`, `REPLICATION_*`, `DB_PRIMARY_URL`, `DB_REPLICA_URL` y `API_KEY_POS`.
 
+## Decisiones de diseño
+
+| Decisión | Por qué | Costo que acepto |
+|---|---|---|
+| **Réplica de lectura** y lecturas siempre a la réplica | Hay ~70 lecturas por cada escritura; la primaria queda libre para los POS | Las lecturas pueden estar atrasadas (consistencia eventual, objetivo ≤ 30 s) |
+| **Replicación asíncrona** | Las escrituras no esperan a la réplica, y si la réplica cae la primaria sigue escribiendo | En una caída de la primaria se podrían perder las últimas transacciones (RPO > 0 posible) |
+| **El POST confirma desde la primaria** | El POS necesita ver lo que acaba de escribir (*read-your-writes*) | Una lectura extra en la primaria por cada escritura |
+| **Kong separado de NGINX** | El gateway decide *quién entra y a dónde* (API key, límite, rutas); el balanceador decide *qué instancia atiende*. El enunciado pide separar los roles | Un salto de red más (~1–5 ms) y otro contenedor que configurar |
+| **API key solo para escribir; límite de peticiones para leer** | Solo los POS pueden cambiar el stock; el público puede consultar, pero sin saturar el sistema | Los clientes legítimos que pasen el límite reciben 429 |
+| **Aplicación sin estado**, con una conexión a la BD por petición | Cualquier instancia atiende cualquier petición; se puede agregar o quitar instancias | Abrir una conexión cada vez es más lento que un *pool* |
+| **Fallback a la primaria si la réplica no responde** | Las consultas siguen funcionando aunque caiga la réplica | Esas lecturas cargan la primaria; la cabecera `X-DB` lo deja visible |
+| **Kong sin base de datos** (configuración en un archivo) | Más simple: todo está en el repositorio y se levanta con un comando | Para cambiar rutas o claves hay que reiniciar el gateway |
+| **NGINX vuelve a resolver los nombres cada 5 s** | Si una instancia se recrea con otra IP, NGINX la encuentra (problema real encontrado en la prueba de falla 3) | Consultas DNS periódicas dentro de Docker |
+
+## Limitaciones
+
+- **Puntos únicos de falla:** hay un solo gateway, un solo balanceador y todo corre en **un solo host** Docker. Si ese computador se apaga, se cae todo.
+- **El *failover* de la primaria es manual:** hay que ejecutar `pg_promote()`, cambiar `DB_PRIMARY_URL` y recrear las instancias. En la prueba, con los pasos automatizados en un script, tomó **11 s**; hecho a mano tomaría 1–3 minutos. Herramientas como Patroni lo harían automático.
+- **Riesgo de *split-brain*:** si la primaria antigua vuelve a encenderse después de promover la réplica, habría dos primarias. Hay que mantenerla apagada y reconstruirla como réplica.
+- **El *fallback* a la primaria es lento:** si la réplica está caída, cada lectura espera el tiempo de conexión (~8 s medidos) antes de ir a la primaria.
+- **No se mide el atraso de la réplica dentro de la app:** si la réplica se atrasa más de 30 s, la app no lo detecta sola (se ve con `pg_stat_replication`).
+- **El límite de peticiones está en 10 por minuto** para poder demostrarlo; en producción serían 60. Además se cuenta por IP y en memoria de cada gateway (`policy: local`).
+- **Seguridad básica:** una sola API key compartida por todos los POS, sin HTTPS, y contraseñas de ejemplo en `.env.example` (solo para clase).
+- **Datos de ejemplo:** 3 locales y 3 productos; no hay carga masiva ni pruebas de rendimiento.
+
 ## Estado
 
 - [x] Fase 1 — Diseño (etiqueta `fase-1`)
-- [x] Fase 2 — Arquitectura en Docker
-- [ ] Fase 3 — Aplicación real y pruebas de falla
+- [x] Fase 2 — Arquitectura en Docker (etiqueta `fase-2`)
+- [x] Fase 3 — Aplicación real y [pruebas de falla](docs/fase3/PRUEBAS_DE_FALLA.md)

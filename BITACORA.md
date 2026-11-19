@@ -40,3 +40,9 @@
 - **Dónde me trabé:** Docker Desktop volvió a fallar al iniciar por un archivo `engine.sock` bloqueado, y lo resolví renombrando la carpeta `docker-secrets-engine`. En la tercera prueba, después de recrear las instancias, NGINX seguía usando sus direcciones IP antiguas y respondía 502; lo corregí configurando NGINX para que vuelva a resolver los nombres cada 5 segundos.
 - **Qué haré la próxima clase:** completar el README final con las decisiones de diseño y las limitaciones, y practicar la demostración en vivo para la presentación.
 - **Uso de IA:** le pedí a Claude el código de la aplicación y scripts para medir las fallas. Yo probé cada endpoint por el gateway, revisé las cabeceras X-Instance y X-DB, y verifiqué que los resultados y las conclusiones de cada prueba tuvieran sentido.
+
+## Jue 19 nov
+- **Qué hice hoy:** completé el README final con las decisiones de diseño (cada una con su justificación y su costo) y las limitaciones del sistema. Hice la prueba de "clon limpio": cloné el repositorio desde GitHub en una carpeta nueva, copié `.env.example` a `.env` y levanté todo con `docker compose up -d --build`; los 6 servicios quedaron arriba, la réplica en streaming, el GET respondió `X-DB: replica` y el POST `X-DB: primary`.
+- **Dónde me trabé:** Docker Desktop volvió a fallar al iniciar por el archivo `engine.sock`; ya sé resolverlo renombrando la carpeta `docker-secrets-engine`. Lo dejo anotado para el día de la presentación.
+- **Qué haré la próxima clase:** revisar todo, etiquetar `fase-3` para la entrega y practicar la demostración y las fallas en vivo.
+- **Uso de IA:** le pedí a Claude redactar las decisiones y limitaciones a partir de lo que medimos en las pruebas de falla; las revisé para poder explicarlas con mis palabras.
