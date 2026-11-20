@@ -48,3 +48,9 @@
 - **Capturas de evidencia:** tomé 6 capturas de la terminal con el sistema funcionando (servicios, balanceador alternando, 401 sin API key, 201 con `X-DB: primary`, 429 por el límite de peticiones y la réplica con el dato recién insertado) y las agregué al README en la sección "Evidencias de funcionamiento".
 - **Qué haré la próxima clase:** etiquetar `fase-3` para la entrega y repasar las preguntas sobre mis decisiones de diseño.
 - **Uso de IA:** le pedí a Claude redactar las decisiones y limitaciones a partir de lo que medimos en las pruebas de falla; las revisé para poder explicarlas con mis palabras.
+
+## Vie 20 nov — Entrega Fase 3
+- **Qué hice hoy:** cerré la entrega de la Fase 3. Revisé que estuvieran completos la aplicación real (contrato con `X-Instance` y `X-DB`), las dos funciones del gateway (API key y límite de peticiones), `docs/fase3/PRUEBAS_DE_FALLA.md` con los tres experimentos (RPO = 0 y RTO = 11,1 s), las capturas de evidencia y el README final con decisiones de diseño y limitaciones. Volví a levantar el sistema y comprobé una lectura (`X-DB: replica`) y una escritura (`X-DB: primary`). Etiqueté el commit como `fase-3`.
+- **Dónde me trabé:** Docker Desktop no arrancó otra vez por el archivo `engine.sock` bloqueado; ya es la cuarta vez, así que anoté el procedimiento para resolverlo rápido el día de la presentación (apartar la carpeta `docker-secrets-engine` y abrir Docker de nuevo).
+- **Qué haré la próxima clase:** practicar la demostración y las fallas en vivo (apagar una instancia y matar la primaria) y repasar las preguntas sobre mis decisiones de diseño para la presentación del miércoles 25.
+- **Uso de IA:** le pedí a Claude el código, las configuraciones y los scripts de medición de las pruebas de falla. Yo probé cada endpoint, ejecuté las fallas en mi computador, revisé los resultados y estudié cada archivo de configuración para poder explicarlo y modificarlo sin ayuda.
